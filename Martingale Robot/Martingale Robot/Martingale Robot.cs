@@ -76,7 +76,7 @@ namespace cAlgo.Robots
             {
                 //如果连输4次转换买卖方向
                 loss_count = loss_count + 1;
-                if (loss_count > 4)
+                if (loss_count == 4)
                 {
                     if (position.TradeType == TradeType.Buy)
                     {

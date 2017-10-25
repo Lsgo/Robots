@@ -1,4 +1,4 @@
-﻿// -------------------------------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------------------------------
 //
 //    This code is a cAlgo API sample.
 //
@@ -13,7 +13,7 @@
 //    continue to double the volume amount for  all orders created until one of them hits the take Profit. 
 //    After a Take Profit is hit, a new random Buy or Sell order is created with the Initial Volume amount.
 //
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
 
 using System;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace cAlgo.Robots
     [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.None)]
     public class MartingaleRobot : Robot
     {
-        [Parameter("Initial Volume", DefaultValue = 10000, MinValue = 0)]
+        [Parameter("Initial Volume", DefaultValue = 100, MinValue = 0)]
         public int InitialVolume { get; set; }
 
         [Parameter("Stop Loss", DefaultValue = 40)]
@@ -35,12 +35,6 @@ namespace cAlgo.Robots
 
         [Parameter("Take Profit", DefaultValue = 40)]
         public int TakeProfit { get; set; }
-
-
-        [Parameter("Martingale Multiplier", DefaultValue = 2.0)]
-        public double Multiplier { get; set; }
-
-        public int loss_count = 1;
 
         private Random random = new Random();
 
@@ -67,30 +61,15 @@ namespace cAlgo.Robots
             if (position.Label != "Martingale" || position.SymbolCode != Symbol.Code)
                 return;
 
+            //盈利翻倍
             if (position.GrossProfit > 0)
             {
-                loss_count = 1;
-                ExecuteOrder(InitialVolume, GetRandomTradeType());
+                ExecuteOrder((int)position.Volume * 2, position.TradeType);
             }
+            //亏损
             else
             {
-                //如果连输4次转换买卖方向
-                loss_count = loss_count + 1;
-                if ((int)loss_count == 4)
-                {
-                    if (position.TradeType == TradeType.Buy)
-                    {
-                        ExecuteOrder((int)(position.Volume * Multiplier), TradeType.Sell);
-                    }
-                    else
-                    {
-                        ExecuteOrder((int)(position.Volume * Multiplier), TradeType.Buy);
-                    }
-                }
-                else
-                {
-                    ExecuteOrder((int)(position.Volume * Multiplier), position.TradeType);
-                }
+                ExecuteOrder(InitialVolume, GetRandomTradeType());
             }
         }
 
